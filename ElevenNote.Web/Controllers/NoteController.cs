@@ -14,8 +14,8 @@ namespace ElevenNote.Web.Controllers
     {
         public ActionResult Index()
         {
-            var userId = Guid.Parse(User.Identity.GetUserId());
-            var service = new NoteService(userId);
+
+            var service = CreateNoteService();
             var model = service.GetNotes();
 
             return View(model);
@@ -32,15 +32,33 @@ namespace ElevenNote.Web.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            var userId = Guid.Parse(User.Identity.GetUserId());
-            var service = new NoteService(userId);
 
-            service.CreateNote(model);
+            // var userId = Guid.Parse(User.Identity.GetUserId());
+            //var service = new NoteService(userId);
+            var service = CreateNoteService();
 
+            if (service.CreateNote(model))
+            {
+                TempData["SaveResult"] = "Your note was created.";
+                return RedirectToAction("Index");
 
+            }
 
-            return RedirectToAction("Index");
+            ModelState.AddModelError("", "Your note could not be created.");
+            return View(model);
+
         }
 
+        private NoteService CreateNoteService()
+        {
+            //can't do 
+            //public NoteControlller() 
+            //{
+            //  _scc = CreateNoteService();
+            //}
+            var userId = Guid.Parse(User.Identity.GetUserId());
+            var service = new NoteService(userId);
+            return service;
+        }
     }
 }
